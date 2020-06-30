@@ -1,9 +1,9 @@
-FROM debian:latest
+FROM debian:8
 
 MAINTAINER timegrid@pega.sh
 
-ARG user
-ARG uid
+ARG user=user
+ARG uid=1000
 
 RUN apt-get update && \
     apt-get install apt-utils -y
@@ -30,7 +30,7 @@ RUN mkdir timegrid && chown $user:www-data timegrid && \
 
 USER $user
 
-RUN git clone https://github.com/timegridio/timegrid
+COPY --chown=$user . timegrid
 
 WORKDIR /var/www/timegrid
 
@@ -46,7 +46,6 @@ RUN /etc/init.d/mysql start && \
     php artisan key:generate && \
     php artisan migrate && \
     php artisan db:seed && \
-    php artisan geoip:update && \
     /etc/init.d/mysql stop
 
 CMD /etc/init.d/mysql start && tail -f /dev/null
