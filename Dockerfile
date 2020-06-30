@@ -10,16 +10,7 @@ RUN apt-get update && \
 
 RUN adduser --disabled-password --gecos "" -u $uid $user
 
-RUN echo 'mysql-server mysql-server/root_password password r00t' | debconf-set-selections && \
-    echo 'mysql-server mysql-server/root_password_again password r00t'| debconf-set-selections && \
-    apt-get install mysql-server -y && \
-    /etc/init.d/mysql stop
-
-RUN apt-get install php5 php5-mysql git wget curl php5-curl php5-intl phpunit vim -y && \
-    /etc/init.d/mysql start && \
-    echo "CREATE DATABASE timegrid_dev CHARACTER SET utf8 COLLATE utf8_general_ci; GRANT ALL ON timegrid_dev.* TO 'timegrid_dev'@localhost IDENTIFIED BY 'tgpass';" | mysql -pr00t && \
-    echo "CREATE DATABASE testing_timegrid CHARACTER SET utf8 COLLATE utf8_general_ci; GRANT ALL ON testing_timegrid.* TO 'testing_timegrid'@localhost IDENTIFIED BY 'testing_timegrid';" | mysql -pr00t && \
-    /etc/init.d/mysql stop
+RUN apt-get install php5 php5-mysql git wget curl php5-curl php5-intl phpunit vim -y 
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -34,20 +25,10 @@ COPY --chown=$user . timegrid
 
 WORKDIR /var/www/timegrid
 
-RUN cp .env.example .env && mkdir /tmp/timegrid_storage && \
-    sed -i -e 's/^DB_HOST.*/DB_HOST="127.0.0.1"/g' -e 's/^DB_DATABASE.*/DB_DATABASE="timegrid_dev"/g' -e 's/^DB_USERNAME.*/DB_USERNAME="timegrid_dev"/g' -e 's/^DB_PASSWORD.*/DB_PASSWORD="tgpass"/g' -e 's/^STORAGE_PATH=.*/STORAGE_PATH="\/tmp\/timegrid_storage"/g' .env
+RUN mkdir /tmp/timegrid_storage
 
 RUN composer install --no-interaction
 
-USER root:root
-
-RUN /etc/init.d/mysql start && \
-    php artisan migrate --seed --database=testing && \
-    php artisan key:generate && \
-    php artisan migrate && \
-    php artisan db:seed && \
-    /etc/init.d/mysql stop
-
-CMD /etc/init.d/mysql start && tail -f /dev/null
+CMD /var/www/timegrid/entrypoint.sh
 
 EXPOSE 8000

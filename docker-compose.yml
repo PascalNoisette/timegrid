@@ -1,0 +1,28 @@
+version: '3'
+services:
+
+  #PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      #image: netpascal0123/timegrid
+    restart: unless-stopped
+    depends_on:
+    - database
+    ports:
+    - 8000:8000
+    #for dev
+    #volumes:
+    #  - ./:/var/www/timegrid
+  database:
+    image: mysql:5.6
+    restart: unless-stopped
+    environment:
+    - MYSQL_ROOT_PASSWORD=r00t
+    - MYSQL_DATABASE=$DB_DATABASE
+    - MYSQL_USER=$DB_USERNAME
+    - MYSQL_PASSWORD=$DB_PASSWORD
+    volumes:
+      - ./dbdata:/var/lib/mysql/
+      - ./docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
