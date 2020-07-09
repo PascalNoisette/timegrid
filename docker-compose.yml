@@ -3,18 +3,14 @@ services:
 
   #PHP Service
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      #image: netpascal0123/timegrid
+    image: netpascal0123/timegrid:latest
     restart: unless-stopped
     depends_on:
     - database
+    volumes:
+    - .:/home/username/timegrid/
     ports:
-    - 8000:8000
-    #for dev
-    #volumes:
-    #  - ./:/var/www/timegrid
+    - 8090:8000
   database:
     image: mysql:5.6
     restart: unless-stopped
