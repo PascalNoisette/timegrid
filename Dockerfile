@@ -27,7 +27,7 @@ WORKDIR /var/www/timegrid
 
 RUN mkdir /tmp/timegrid_storage
 
-RUN composer install --no-interaction
+RUN composer global require hirak/prestissimo && composer install --no-interaction
 
 CMD /var/www/timegrid/entrypoint.sh
 
